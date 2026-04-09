@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burnout Prediction System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#080c14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BurnoutOS">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-icon">🧠</div>
+    <h2>Burnout Prediction</h2>
+  </div>
+  <div class="nav-links">
+    <a href="index.html" class="active">Dashboard</a>
+    <a href="history.html">History</a>
+    <a href="heatmap.html">Heatmap</a>
+    <a href="report.html">Report</a>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- INPUT CARD -->
+  <div class="card input-card">
+    <div class="card-title">
+      <span class="card-title-dot"></span>
+      Daily Input
+    </div>
+
+    <div class="field-group">
+      <label>Study Hours</label>
+      <div class="slider-row">
+        <input type="range" id="studyR" min="0" max="12" value="0"
+               oninput="syncField('study','studyR')">
+        <input type="number" id="study" min="0" max="12" value="0"
+               oninput="syncRange('study','studyR')">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Sleep Hours</label>
+      <div class="slider-row">
+        <input type="range" id="sleepR" min="1" max="10" value="1"
+               oninput="syncField('sleep','sleepR')">
+        <input type="number" id="sleep" min="1" max="10" value="1"
+               oninput="syncRange('sleep','sleepR')">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Assignment Load (0–5)</label>
+      <div class="slider-row">
+        <input type="range" id="assignmentR" min="0" max="5" value="0"
+               oninput="syncField('assignment','assignmentR')">
+        <input type="number" id="assignment" min="0" max="5" value="0"
+               oninput="syncRange('assignment','assignmentR')">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Screen Time (hrs)</label>
+      <div class="slider-row">
+        <input type="range" id="screenR" min="0" max="12" value="0"
+               oninput="syncField('screen','screenR')">
+        <input type="number" id="screen" min="0" max="12" value="0"
+               oninput="syncRange('screen','screenR')">
+      </div>
+    </div>
+
+    <div class="field-group">
+        <!-- SESSION -->
+   <label for="session">SESSION</label>
+   <select id="session" class="form-control">
+     <option value="Morning">Morning</option>
+     <option value="Afternoon">Afternoon</option>
+     <option value="Evening">Evening</option>
+     <option value="Night">Night</option>
+   </select>
+
+   <!-- NEW: Heart Rate from Arduino -->
+   <div class="form-group mt-3">
+     <label for="heartRate">❤️ Heart Rate (BPM) <span id="liveBPM" class="text-success"></span></label>
+     <input type="number" id="heartRate" min="40" max="200" value="72" class="form-control">
+   </div>
+
+   <!-- Analyze Button -->
+   <button onclick="analyze()" class="btn btn-primary w-100 mt-4">Analyze Burnout Risk</button>
+
+   <!-- NEW: Connect Arduino Button -->
+   <button id="connectHardware" class="btn btn-success w-100 mt-3">
+     🔌 Connect Arduino Pulse Sensor
+   </button>
+   <div id="hardwareStatus" class="mt-2 text-center fw-bold"></div>
+  </div>
+
+  <!-- ANALYTICS CARD -->
+  <div class="card analytics-card">
+    <div class="card-title">
+      <span class="card-title-dot"></span>
+      Risk Analytics
+    </div>
+
+    <div class="ring-wrapper">
+      <div class="progress-container">
+        <svg class="progress-ring" width="120" height="120" viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="50"/>
+          <circle class="ring-progress" cx="60" cy="60" r="50"/>
+        </svg>
+        <div class="progress-text">
+          <span id="percentage">0%</span>
+          <span class="progress-label">Risk</span>
+        </div>
+      </div>
+      <div class="ring-stats">
+        <div class="stat-item">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="score">—</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Risk Level</span>
+          <span id="riskBadge" class="risk-badge low">● Low</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric-box">
+        <div class="metric-box-label">CSI</div>
+        <div class="metric-box-value" id="csi">—</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-box-label">Trend</div>
+        <div class="metric-box-value" id="trend">—</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-box-label">Entries</div>
+        <div class="metric-box-value" id="entries">0</div>
+      </div>
+    </div>
+
+    <div id="warning" class="warning">⚠️ Rising Cognitive Strain Detected</div>
+
+    <div id="recommendation" class="recommendation-box">
+      Enter your daily metrics and click Analyze to see your burnout risk assessment.
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-section-header">
+        <span class="chart-label">Score Trend — Last 7 entries</span>
+        <span id="avgScore" class="chart-label"></span>
+      </div>
+      <canvas id="trendChart" height="90"></canvas>
+    </div>
+
+    <div class="summary-row">
+      <div class="metric-box">
+        <div class="metric-box-label">📅 Entries Today</div>
+        <div class="metric-box-value" id="entriesCount">0</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-box-label">📊 Avg Score Today</div>
+        <div class="metric-box-value" id="avgScoreToday">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js');
+  }
+</script>
+
+<script>
+let port;
+let reader;
+
+document.getElementById("connectHardware").addEventListener("click", async () => {
+  try {
+    port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 9600 });
+
+    document.getElementById("hardwareStatus").innerText = "✅ Arduino Connected";
+
+    const decoder = new TextDecoderStream();
+    port.readable.pipeTo(decoder.writable);
+    reader = decoder.readable.getReader();
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      let bpm = value.trim();
+      if (!isNaN(bpm)) {
+        document.getElementById("heartRate").value = bpm;
+        document.getElementById("liveBPM").innerText = "Live: " + bpm + " BPM";
+      }
+    }
+
+  } catch (error) {
+    document.getElementById("hardwareStatus").innerText = "❌ Connection Failed";
+    console.error(error);
+  }
+});
+</script>
+
+</body>
+</html>
