@@ -1,4 +1,4 @@
-const CACHE_NAME = 'burnout-pwa-v3';
+const CACHE_NAME = 'burnout-pwa-v4';
 const FILES_TO_CACHE = [
   './index.html',
   './history.html',
@@ -7,6 +7,8 @@ const FILES_TO_CACHE = [
   './style.css',
   './script.js',
   './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
   'https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap',
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];
