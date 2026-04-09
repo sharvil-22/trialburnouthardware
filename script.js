@@ -35,7 +35,8 @@ async function connectHardware() {
       buffer = lines.pop(); // keep incomplete line in buffer
 
       for (const line of lines) {
-        const trimmed = line.trim();
+        console.log("RAW LINE:", JSON.stringify(line)); // add this
+        const trimmed = line.replace(/\r/g, '').trim();
         if (!trimmed) continue;
 
         // Arduino sends raw BPM numbers like "72" or status strings
