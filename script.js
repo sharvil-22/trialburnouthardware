@@ -35,7 +35,6 @@ async function connectHardware() {
       buffer = lines.pop(); // keep incomplete line in buffer
 
       for (const line of lines) {
-        console.log("RAW LINE:", JSON.stringify(line)); // add this
         const trimmed = line.replace(/\r/g, '').trim();
         if (!trimmed) continue;
 
