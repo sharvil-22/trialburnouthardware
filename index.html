@@ -77,29 +77,40 @@
     </div>
 
     <div class="field-group">
-        <!-- SESSION -->
-   <label for="session">SESSION</label>
-   <select id="session" class="form-control">
-     <option value="Morning">Morning</option>
-     <option value="Afternoon">Afternoon</option>
-     <option value="Evening">Evening</option>
-     <option value="Night">Night</option>
-   </select>
+      <label>Stress Level (1–10)</label>
+      <div class="slider-row">
+        <input type="range" id="stressR" min="1" max="10" value="1"
+               oninput="syncField('stress','stressR')">
+        <input type="number" id="stress" min="1" max="10" value="1"
+               oninput="syncRange('stress','stressR')">
+      </div>
+    </div>
 
-   <!-- NEW: Heart Rate from Arduino -->
-   <div class="form-group mt-3">
-     <label for="heartRate">❤️ Heart Rate (BPM) <span id="liveBPM" class="text-success"></span></label>
-     <input type="number" id="heartRate" min="40" max="200" value="72" class="form-control">
-   </div>
+    <div class="field-group">
+      <label>Session</label>
+      <select id="session">
+        <option value="Morning">Morning</option>
+        <option value="Afternoon">Afternoon</option>
+        <option value="Evening">Evening</option>
+        <option value="Night">Night</option>
+      </select>
+    </div>
 
-   <!-- Analyze Button -->
-   <button onclick="analyze()" class="btn btn-primary w-100 mt-4">Analyze Burnout Risk</button>
+    <div class="field-group">
+      <label>❤️ Heart Rate (BPM) <span id="liveBPM" style="color:var(--low);font-size:11px;margin-left:6px;text-transform:none;letter-spacing:0;"></span></label>
+      <input type="number" id="heartRate" min="40" max="200" value="72">
+    </div>
 
-   <!-- NEW: Connect Arduino Button -->
-   <button id="connectHardware" class="btn btn-success w-100 mt-3">
-     🔌 Connect Arduino Pulse Sensor
-   </button>
-   <div id="hardwareStatus" class="mt-2 text-center fw-bold"></div>
+    <button class="analyze-btn" onclick="analyze()">Analyze Burnout Risk</button>
+
+    <div class="hardware-section">
+      <button id="connectHardware" class="connect-btn">
+        🔌 Connect Arduino Pulse Sensor
+      </button>
+      <div id="hardwareStatus" class="hardware-status"></div>
+    </div>
+
+    <div id="message" class="message"></div>
   </div>
 
   <!-- ANALYTICS CARD -->
@@ -180,39 +191,6 @@
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./service-worker.js');
   }
-</script>
-
-<script>
-let port;
-let reader;
-
-document.getElementById("connectHardware").addEventListener("click", async () => {
-  try {
-    port = await navigator.serial.requestPort();
-    await port.open({ baudRate: 9600 });
-
-    document.getElementById("hardwareStatus").innerText = "✅ Arduino Connected";
-
-    const decoder = new TextDecoderStream();
-    port.readable.pipeTo(decoder.writable);
-    reader = decoder.readable.getReader();
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-
-      let bpm = value.trim();
-      if (!isNaN(bpm)) {
-        document.getElementById("heartRate").value = bpm;
-        document.getElementById("liveBPM").innerText = "Live: " + bpm + " BPM";
-      }
-    }
-
-  } catch (error) {
-    document.getElementById("hardwareStatus").innerText = "❌ Connection Failed";
-    console.error(error);
-  }
-});
 </script>
 
 </body>
