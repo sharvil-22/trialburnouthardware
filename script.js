@@ -368,13 +368,17 @@ function checkTrend(data) {
 
   const warn = document.getElementById("warning");
   if (!warn) return;
+
+  // Need at least 7 entries AND score must spike above rolling average
   if (data.length >= 7) {
-    const avg = data.slice(-7).reduce((s,e) => s + e.score, 0) / 7;
+    const avg = data.slice(-7).reduce((s, e) => s + e.score, 0) / 7;
     if (last > avg + 15) {
       warn.classList.add("visible");
       return;
     }
   }
+
+  // Always hide if fewer than 7 entries
   warn.classList.remove("visible");
 }
 
