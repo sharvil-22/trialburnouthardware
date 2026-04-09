@@ -2,6 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+
+  <script>
+  async function checkBrowser() {
+    const ua = navigator.userAgent;
+    const vendor = navigator.vendor;
+    
+    // Detect Brave
+    const isBrave = (navigator.brave && await navigator.brave.isBrave()) || false;
+    
+    const isChrome = /Chrome/.test(ua) && 
+                     /Google Inc/.test(vendor) && 
+                     !/Edg/.test(ua) && 
+                     !/OPR/.test(ua) && 
+                     !/Vivaldi/.test(ua) &&
+                     !isBrave;
+
+    if (!isChrome) {
+      document.documentElement.innerHTML = `
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Chrome Required — BurnoutOS</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body {
+                background: #080c14;
+                color: #e8edf5;
+                font-family: 'DM Sans', sans-serif;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 20px;
+              }
+              .wrap { max-width: 480px; }
+              .icon { font-size: 64px; margin-bottom: 24px; }
+              h1 {
+                font-size: 26px;
+                font-weight: 700;
+                margin-bottom: 12px;
+                color: #e8edf5;
+              }
+              p {
+                font-size: 15px;
+                color: #6b7a99;
+                line-height: 1.6;
+                margin-bottom: 28px;
+              }
+              a {
+                display: inline-block;
+                padding: 13px 32px;
+                background: linear-gradient(135deg, #4f8ef7, #7c6af7);
+                color: white;
+                text-decoration: none;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 15px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="wrap">
+              <div class="icon">🌐</div>
+              <h1>Chrome Required</h1>
+              <p>BurnoutOS uses Web Serial API and local encrypted storage that only works in Google Chrome. Please open this site in Chrome to continue.</p>
+              <a href="https://www.google.com/chrome/" target="_blank">Download Chrome</a>
+            </div>
+          </body>
+        </html>
+      `;
+    }
+  }
+  checkBrowser();
+  </script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Burnout Prediction System</title>
   <link rel="stylesheet" href="style.css">
