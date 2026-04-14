@@ -1,1 +1,1 @@
-const GEMINI_API_KEY = "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";
+const GEMINI_API_KEY = "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";
